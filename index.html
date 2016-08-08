@@ -179,6 +179,21 @@ function codebenderInit() {
     };
     blinkCodebenderClient.setFilelist(blinkCodebenderFilelist);
     // blinkCodebenderClient.setCloneUrl('http://chipkitdemo.codebender.cc/dashboard/#/ide/wksp-blink');
+    
+    
+    // ESP8266 codebender editor
+    var helloworldOptions = {
+        id: 1,
+        CODEBENDER_DOMAIN: 'https://esp8266-proteus.codebender.cc',
+        iframe: document.getElementById('helloworld-proteus-iframe').contentWindow
+    };
+    var helloworldCodebenderClient = new CodebenderClient(helloworldOptions);
+    var helloworldCodebenderFilelist = {
+        'Hello World.ino': '/*\n  Serial Hello World\n  \n  Initialized Serial Monitor at 115200 baudrate\n  Sends \"Hello World\" on the Serial Monitor every second\n\n */\n \nvoid setup()\n{\n\t// Initialize Serial Monitor\n\tSerial.begin(115200);\n}\n\nvoid loop()\n{\n\t// Send message\n\tSerial.println(\"Hello World\");\n\t// Do nothing for a second\n\tdelay(1000);\n}\n'
+    };
+    helloworldCodebenderClient.setFilelist(helloworldCodebenderFilelist);
+    // helloworldCodebenderClient.setCloneUrl('http://chipkitdemo.codebender.cc/dashboard/#/ide/wksp-helloworld');
+
 }
 
 window.onload = codebenderInit;
@@ -218,15 +233,11 @@ window.onload = codebenderInit;
 <iframe id="blink-proteus-iframe" style="height: 510px; width: 100%; margin: 10px 0 10px;" allowTransparency="true" src="https://esp8266-proteus.codebender.cc/" frameborder="0"></iframe>
 
 <h3><a id="welcome-to-github-pages" class="anchor" href="#welcome-to-github-pages" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Hello World</h3>
-
-<iframe style="height: 510px; width: 100%; margin: 10px 0 10px;" allowTransparency="true" src="https://codebender.cc/embed/serialmonitor" frameborder="0"></iframe>
-
-
-<h3><a id="welcome-to-github-pages" class="anchor" href="#welcome-to-github-pages" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Hello World</h3>
-
 <p>
   Another one of the most simple programs you can write is the Hello World program. This sends data from your ChipKIT board to your computer
 </p>
+
+<iframe id="helloworld-proteus-iframe" style="height: 510px; width: 100%; margin: 10px 0 10px;" allowTransparency="true" src="https://esp8266-proteus.codebender.cc/" frameborder="0"></iframe>
 
 <p>
   The code itself is pretty easy to understand. Go ahead, click <b>Flash</b> to load this code to your board.

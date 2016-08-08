@@ -189,10 +189,23 @@ function codebenderInit() {
     };
     var helloworldCodebenderClient = new CodebenderClient(helloworldOptions);
     var helloworldCodebenderFilelist = {
-        'Hello World.ino': '/*\n  Serial Hello World\n  \n  Initialized Serial Monitor at 115200 baudrate\n  Sends \"Hello World\" on the Serial Monitor every second\n\n */\n \nvoid setup()\n{\n\t// Initialize Serial Monitor\n\tSerial.begin(115200);\n}\n\nvoid loop()\n{\n\t// Send message\n\tSerial.println(\"Hello World\");\n\t// Do nothing for a second\n\tdelay(1000);\n}\n'
+        'Hello World.ino': '/*\n *  This sketch demonstrates how to scan WiFi networks. \n *  The API is almost the same as with the WiFi Shield library, \n *  the most obvious difference being the different file you need to include:\n */\n#include "ESP8266WiFi.h"\n\nvoid setup() {\n  Serial.begin(115200);\n\n  // Set WiFi to station mode and disconnect from an AP if it was previously connected\n  WiFi.mode(WIFI_STA);\n  WiFi.disconnect();\n  delay(100);\n\n  Serial.println("Setup done");\n}\n\nvoid loop() {\n  Serial.println("scan start");\n\n  // WiFi.scanNetworks will return the number of networks found\n  int n = WiFi.scanNetworks();\n  Serial.println("scan done");\n  if (n == 0)\n    Serial.println("no networks found");\n  else\n  {\n    Serial.print(n);\n    Serial.println(" networks found");\n    for (int i = 0; i < n; ++i)\n    {\n      // Print SSID and RSSI for each network found\n      Serial.print(i + 1);\n      Serial.print(": ");\n      Serial.print(WiFi.SSID(i));\n      Serial.print(" (");\n      Serial.print(WiFi.RSSI(i));\n      Serial.print(")");\n      Serial.println((WiFi.encryptionType(i) == ENC_TYPE_NONE)?" ":"*");\n      delay(10);\n    }\n  }\n  Serial.println("");\n\n  // Wait a bit before scanning again\n  delay(5000);\n}'
     };
     helloworldCodebenderClient.setFilelist(helloworldCodebenderFilelist);
     // helloworldCodebenderClient.setCloneUrl('http://chipkitdemo.codebender.cc/dashboard/#/ide/wksp-helloworld');
+
+    // ESP8266 codebender editor
+    var scanOptions = {
+        id: 1,
+        CODEBENDER_DOMAIN: 'https://esp8266-proteus.codebender.cc',
+        iframe: document.getElementById('scan-proteus-iframe').contentWindow
+    };
+    var scanCodebenderClient = new CodebenderClient(scanOptions);
+    var scanCodebenderFilelist = {
+        'Hello World.ino': '/*\n  Serial Hello World\n  \n  Initialized Serial Monitor at 115200 baudrate\n  Sends \"Hello World\" on the Serial Monitor every second\n\n */\n \nvoid setup()\n{\n\t// Initialize Serial Monitor\n\tSerial.begin(115200);\n}\n\nvoid loop()\n{\n\t// Send message\n\tSerial.println(\"Hello World\");\n\t// Do nothing for a second\n\tdelay(1000);\n}\n'
+    };
+    scanCodebenderClient.setFilelist(scanCodebenderFilelist);
+    // scanCodebenderClient.setCloneUrl('http://chipkitdemo.codebender.cc/dashboard/#/ide/wksp-scan');
 
 }
 
@@ -250,6 +263,10 @@ window.onload = codebenderInit;
 <iframe style="height: 510px; width: 100%; margin: 10px 0 10px;" allowTransparency="true" src="https://codebender.cc/embed/serialmonitor" frameborder="0"></iframe>
 
 <h3><a id="welcome-to-github-pages" class="anchor" href="#welcome-to-github-pages" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>WiFi Scan</h3>
+
+<p>Now let's do something a little more interesting! Program the following code to scan for the surrounding WiFi Networks, and print them on the Serial Monitor.</p>
+
+<iframe id="scan-proteus-iframe" style="height: 510px; width: 100%; margin: 10px 0 10px;" allowTransparency="true" src="https://esp8266-proteus.codebender.cc/" frameborder="0"></iframe>
 
 <p>Once again, go to the embedded serial monitor below, set the baud rate to 115200 bps, and click Connect. You should see the board scanning for surrounding WiFi Networks and listing them on the Serial Monitor</p>
 

@@ -171,13 +171,15 @@ function codebenderInit() {
     var blinkOptions = {
         id: 0,
         CODEBENDER_DOMAIN: 'https://esp8266-proteus.codebender.cc',
-        iframe: document.getElementById('blink-proteus-iframe').contentWindow
+        iframe: document.getElementById('storing-proteus-iframe').contentWindow
     };
-    var blinkCodebenderClient = new CodebenderClient(blinkOptions);
-    var blinkCodebenderFilelist = {
-        'Blink.ino': '/*\nTurns on an LED on for one second, then off for one second, repeatedly.\nThis example code is in the public domain.\n*/\n// Pin 13 has an LED connected on most Arduino boards.\n// give it a name:\nint led = 13;\n\n// the setup routine runs once when you press reset:\nvoid setup() \n{\n// initialize the digital pin as an output.\n\tpinMode(led, OUTPUT);\n}\n// the loop routine runs over and over again forever:\n\nvoid loop() {\n\tdigitalWrite(led, HIGH);   // turn the LED on (HIGH is the voltage level)\n\tdelay(1000);               // wait for a second\n\tdigitalWrite(led, LOW);    // turn the LED off by making the voltage LOW\n\tdelay(1000);               // wait for a second\n}'
+    var storingCodebenderClient = new CodebenderClient(storingOptions);
+    var storingCodebenderFilelist = {
+        'Storing Network Settings.ino': '/*\nTurns on an LED on for one second, then off for one second, repeatedly.\nThis example code is in the public domain.\n*/\n// Pin 13 has an LED connected on most Arduino boards.\n// give it a name:\nint led = 13;\n\n// the setup routine runs once when you press reset:\nvoid setup() \n{\n// initialize the digital pin as an output.\n\tpinMode(led, OUTPUT);\n}\n// the loop routine runs over and over again forever:\n\nvoid loop() {\n\tdigitalWrite(led, HIGH);   // turn the LED on (HIGH is the voltage level)\n\tdelay(1000);               // wait for a second\n\tdigitalWrite(led, LOW);    // turn the LED off by making the voltage LOW\n\tdelay(1000);               // wait for a second\n}',
+        'test.h' : 'hello\n',
+        'test.cpp' : 'hello there\n'
     };
-    blinkCodebenderClient.setFilelist(blinkCodebenderFilelist);
+    storingCodebenderClient.setFilelist(storingCodebenderFilelist);
     // blinkCodebenderClient.setCloneUrl('http://chipkitdemo.codebender.cc/dashboard/#/ide/wksp-blink');
     
     
@@ -267,7 +269,7 @@ window.onload = codebenderInit;
  Alright, so let's set up our networks. Change the code below with your own network settings, and add as many networks as you want.
 </p>
 
-<iframe id="blink-proteus-iframe" style="height: 510px; width: 100%; margin: 10px 0 10px;" allowTransparency="true" src="https://esp8266-proteus.codebender.cc/" frameborder="0"></iframe>
+<iframe id="storing-proteus-iframe" style="height: 510px; width: 100%; margin: 10px 0 10px;" allowTransparency="true" src="https://esp8266-proteus.codebender.cc/" frameborder="0"></iframe>
 
 <p>
   After flashing, you'll want to open the Serial Monitor to make sure everything went smoothly. You should see your board writing the network settings in the filesystem, and then connecting successfully to one of the configured networks.

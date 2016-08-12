@@ -204,7 +204,7 @@ function codebenderInit() {
     var scanCodebenderFilelist = {
         'WiFi Scan.ino': '/*\n *  This sketch demonstrates how to scan WiFi networks. \n *  The API is almost the same as with the WiFi Shield library, \n *  the most obvious difference being the different file you need to include:\n */\n#include "ESP8266WiFi.h"\n\nvoid setup() {\n  Serial.begin(115200);\n\n  // Set WiFi to station mode and disconnect from an AP if it was previously connected\n  WiFi.mode(WIFI_STA);\n  WiFi.disconnect();\n  delay(100);\n\n  Serial.println("Setup done");\n}\n\nvoid loop() {\n  Serial.println("scan start");\n\n  // WiFi.scanNetworks will return the number of networks found\n  int n = WiFi.scanNetworks();\n  Serial.println("scan done");\n  if (n == 0)\n    Serial.println("no networks found");\n  else\n  {\n    Serial.print(n);\n    Serial.println(" networks found");\n    for (int i = 0; i < n; ++i)\n    {\n      // Print SSID and RSSI for each network found\n      Serial.print(i + 1);\n      Serial.print(": ");\n      Serial.print(WiFi.SSID(i));\n      Serial.print(" (");\n      Serial.print(WiFi.RSSI(i));\n      Serial.print(")");\n      Serial.println((WiFi.encryptionType(i) == ENC_TYPE_NONE)?" ":"*");\n      delay(10);\n    }\n  }\n  Serial.println("");\n\n  // Wait a bit before scanning again\n  delay(5000);\n}'
     };
-    wifiCodebenderClient.setFilelist(wifiCodebenderFilelist);
+    scanCodebenderClient.setFilelist(scanCodebenderFilelist);
     // scanCodebenderClient.setCloneUrl('http://chipkitdemo.codebender.cc/dashboard/#/ide/wksp-scan');
 
     // ESP8266 codebender editor

@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <title>ESP8266 Demo</title>
+  </head>
+
+  <body>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+  <script>
+    /**
+ * CodebenderClient
+ * Front-end client for the embedded views
+ * @param options object Configuration options for the client
+ */
+function CodebenderClient(options) {
+    /**
+     * Client ID
+     * Shared between the parent frame and the iframe
+     * Usefull for the parent to identify the source iframe of a message
+     * when multiple iframes exists on its page
+     */
+    this.id = options.id ? options.id : 0;
+    /**
+     * URL of the codebender.cc domain
+     * Used when transmitting messages to the iframe
+     */
+    this.CODEBENDER_DOMAIN = options.CODEBENDER_DOMAIN ? options.CODEBENDER_DOMAIN : 'http://localhost';
+    /**
+     * Template for the messages sent to the iframe
+     */
+    this.CODEBENDER_MESSAGE = {
+        /**
+         * Service name.
+         * Used by the iframe to check if the message must be processed
+         */
+        service: 'codebender.cc',
+        /**
+         * Action name.
+         * Used by the iframe to identify the action related to the received message
+         */
+        action: '',
+        /**
+         * Client ID
+         */
+        id: this.id
+    };
+    /**
+     * Setup DOM elements
+     */
+    this.iframe = options.iframe ? options.iframe : null;
+    if (options.verify) {
+        this.$verify = $(options.verify);
+    }
+    if (options.restore) {
+        this.$restore = $(options.restore);
+    }
+    if (options.operationOutput) {
+        this.$operationOutput = $(options.operationOutput);
+    }
+    // Start the event listeners
+    this.startEventListeners();
+}
+/**
+ * Starts the event listeners of the client
+ */
+CodebenderClient.prototype.startEventListeners = function () {
+    var self = this;
+    // Listener for the received messages from the iframe
+    $(window).on('message', this.messageHandler.bind(self));
+    // Listener for the Verify button
+    if (this.$verify) {
+        this.$verify.on('click', this.verifyHandler.bind(self));
+    }
+    // Listener for the restore button
+    if (this.$restore) {
+        this.$restore.on('click', this.restoreHandler.bind(self));
+    }
+};
+/**
+ * Sends a message to the iframe
+ * @param message object Message to send
+ */
+CodebenderClient.prototype.sendMessage = function (message) {
+    message = JSON.stringify(message);
+    if (this.iframe) {
+        this.iframe.postMessage(message, this.CODEBENDER_DOMAIN);
+    }
+};
+/**
+ * Handler for the messages received from the iframe
+ * @param event Event object of the message event
+ */
+CodebenderClient.prototype.messageHandler = function (event) {
+    try {
+        var origin = event.originalEvent.origin;
+        if (origin !== this.CODEBENDER_DOMAIN) {
+            return;
+        }
+
+        var data = event.originalEvent.data;
+        var message = JSON.parse(data);
+        if (message.service === 'codebender.cc' && message.response) {
+            if (message.action === 'operation-output' && this.$operationOutput) {
+                this.$operationOutput.html(message.response);
+            }
+        }
+    }
+    catch (error) {
+    }
+};
+/**
+ * Handler for the Verify button
+ */
+CodebenderClient.prototype.verifyHandler = function () {
+    var message = this.CODEBENDER_MESSAGE;
+    message.action = 'verify';
+    this.sendMessage(message);
+};
+/**
+ * Handler for the Restore button
+ */
+CodebenderClient.prototype.restoreHandler = function () {
+    var message = this.CODEBENDER_MESSAGE;
+    message.action = 'restore';
+    this.sendMessage(message);
+};
+/**
+ * Sets the filelist inside the iframe
+ * @param filelist object The filelist to set
+ */
+CodebenderClient.prototype.setFilelist = function (filelist) {
+    var message = this.CODEBENDER_MESSAGE;
+    message.filelist = filelist;
+    message.action = 'set-filelist';
+    this.sendMessage(message);
+};
+/**
+ * Gets the filelist from the iframe
+ */
+CodebenderClient.prototype.getFilelist = function () {
+    var message = this.CODEBENDER_MESSAGE;
+    message.action = 'get-filelist';
+    this.sendMessage(message);
+};
+/**
+ * Sets the Clone URL
+ */
+CodebenderClient.prototype.setCloneUrl = function (url) {
+  var message = this.CODEBENDER_MESSAGE;
+  message.action = 'set-clone-url';
+  message.cloneUrl = url;
+  this.sendMessage(message);
+};
+  </script>
+
+  <script>
+function codebenderInit() {
+    // ESP8266 codebender editor
+    var blinkOptions = {
+        id: 0,
+        CODEBENDER_DOMAIN: 'https://esp8266-proteus.codebender.cc',
+        iframe: document.getElementById('blink-proteus-iframe').contentWindow
+    };
+    var blinkCodebenderClient = new CodebenderClient(blinkOptions);
+    var blinkCodebenderFilelist = {
+        'Blink.ino': '/*\nTurns on an LED on for one second, then off for one second, repeatedly.\nThis example code is in the public domain.\n*/\n// Pin 13 has an LED connected on most Arduino boards.\n// give it a name:\nint led = 13;\n\n// the setup routine runs once when you press reset:\nvoid setup() \n{\n// initialize the digital pin as an output.\n\tpinMode(led, OUTPUT);\n}\n// the loop routine runs over and over again forever:\n\nvoid loop() {\n\tdigitalWrite(led, HIGH);   // turn the LED on (HIGH is the voltage level)\n\tdelay(1000);               // wait for a second\n\tdigitalWrite(led, LOW);    // turn the LED off by making the voltage LOW\n\tdelay(1000);               // wait for a second\n}'
+    };
+    blinkCodebenderClient.setFilelist(blinkCodebenderFilelist);
+    // blinkCodebenderClient.setCloneUrl('http://chipkitdemo.codebender.cc/dashboard/#/ide/wksp-blink');
+    
+    
+    // ESP8266 codebender editor
+    var helloworldOptions = {
+        id: 1,
+        CODEBENDER_DOMAIN: 'https://esp8266-proteus.codebender.cc',
+        iframe: document.getElementById('helloworld-proteus-iframe').contentWindow
+    };
+    var helloworldCodebenderClient = new CodebenderClient(helloworldOptions);
+    var helloworldCodebenderFilelist = {
+        'Hello World.ino': '/*\n  Serial Hello World\n  \n  Initialized Serial Monitor at 115200 baudrate\n  Sends \"Hello World\" on the Serial Monitor every second\n\n */\n \nvoid setup()\n{\n\t// Initialize Serial Monitor\n\tSerial.begin(115200);\n}\n\nvoid loop()\n{\n\t// Send message\n\tSerial.println(\"Hello World\");\n\t// Do nothing for a second\n\tdelay(1000);\n}\n'
+    };
+    helloworldCodebenderClient.setFilelist(helloworldCodebenderFilelist);
+    // helloworldCodebenderClient.setCloneUrl('http://chipkitdemo.codebender.cc/dashboard/#/ide/wksp-helloworld');
+
+    // ESP8266 codebender editor
+    var scanOptions = {
+        id: 2,
+        CODEBENDER_DOMAIN: 'https://esp8266-proteus.codebender.cc',
+        iframe: document.getElementById('scan-proteus-iframe').contentWindow
+    };
+    var scanCodebenderClient = new CodebenderClient(scanOptions);
+    var scanCodebenderFilelist = {
+        'WiFi Scan.ino': '/*\n *  This sketch demonstrates how to scan WiFi networks. \n *  The API is almost the same as with the WiFi Shield library, \n *  the most obvious difference being the different file you need to include:\n */\n#include "ESP8266WiFi.h"\n\nvoid setup() {\n  Serial.begin(115200);\n\n  // Set WiFi to station mode and disconnect from an AP if it was previously connected\n  WiFi.mode(WIFI_STA);\n  WiFi.disconnect();\n  delay(100);\n\n  Serial.println("Setup done");\n}\n\nvoid loop() {\n  Serial.println("scan start");\n\n  // WiFi.scanNetworks will return the number of networks found\n  int n = WiFi.scanNetworks();\n  Serial.println("scan done");\n  if (n == 0)\n    Serial.println("no networks found");\n  else\n  {\n    Serial.print(n);\n    Serial.println(" networks found");\n    for (int i = 0; i < n; ++i)\n    {\n      // Print SSID and RSSI for each network found\n      Serial.print(i + 1);\n      Serial.print(": ");\n      Serial.print(WiFi.SSID(i));\n      Serial.print(" (");\n      Serial.print(WiFi.RSSI(i));\n      Serial.print(")");\n      Serial.println((WiFi.encryptionType(i) == ENC_TYPE_NONE)?" ":"*");\n      delay(10);\n    }\n  }\n  Serial.println("");\n\n  // Wait a bit before scanning again\n  delay(5000);\n}'
+    };
+    scanCodebenderClient.setFilelist(scanCodebenderFilelist);
+    // scanCodebenderClient.setCloneUrl('http://chipkitdemo.codebender.cc/dashboard/#/ide/wksp-scan');
+
+    // ESP8266 codebender editor
+    var wifiOptions = {
+        id: 3,
+        CODEBENDER_DOMAIN: 'https://esp8266-proteus.codebender.cc',
+        iframe: document.getElementById('wifi-proteus-iframe').contentWindow
+    };
+    var wifiCodebenderClient = new CodebenderClient(wifiOptions);
+    var wifiCodebenderFilelist = {
+        'WiFi Client.ino': '/*\n *  This sketch sends a message to a TCP server\n *\n */\n\n#include &ltESP8266WiFi.h&gt;\n#include &lt;ESP8266WiFiMulti.h&gt;\n\nESP8266WiFiMulti WiFiMulti;\n\nvoid setup() {\n    Serial.begin(115200);\n    delay(10);\n\n    // We start by connecting to a WiFi network\n    WiFiMulti.addAP("SSID", "passpasspass");\n\n    Serial.println();\n    Serial.println();\n    Serial.print("Wait for WiFi... ");\n\n    while(WiFiMulti.run() != WL_CONNECTED) {\n        Serial.print(".");\n        delay(500);\n    }\n\n    Serial.println("");\n    Serial.println("WiFi connected");\n    Serial.println("IP address: ");\n    Serial.println(WiFi.localIP());\n\n    delay(500);\n}\n\n\nvoid loop() {\n    const uint16_t port = 80;\n    const char * host = "192.168.1.1"; // ip or dns\n\n    \n    \n    Serial.print("connecting to ");\n    Serial.println(host);\n\n    // Use WiFiClient class to create TCP connections\n    WiFiClient client;\n\n    if (!client.connect(host, port)) {\n        Serial.println("connection failed");\n        Serial.println("wait 5 sec...");\n        delay(5000);\n        return;\n    }\n\n    // This will send the request to the server\n    client.print("Send this data to server");\n\n    //read back one line from server\n    String line = client.readStringUntil(\'\r\');\n    client.println(line);\n\n    Serial.println("closing connection");\n    client.stop();\n    \n    Serial.println("wait 5 sec...");\n    delay(5000);\n}\n'
+    };
+    wifiCodebenderClient.setFilelist(wifiCodebenderFilelist);
+    // scanCodebenderClient.setCloneUrl('http://chipkitdemo.codebender.cc/dashboard/#/ide/wksp-scan');
+
+}
+
+
+window.onload = codebenderInit;
+
+  </script>
+    <header>
+      <div class="inner">
+        <h1>ESP826 Demo</h1>
+        <h2></h2>
+      </div>
+    </header>
+
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+
+<h3><a class="anchor" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Getting started with the ESP8266 in seconds!</h3>
+
+<p>Hey guys, and welcome to our little ESP8266 Getting Started page! This is provided by codebender as a demo of the things we're working on for ESP8266.</p>
+
+<p>Please note that this page is currently available for the <code>Adafruit HUZZAH ESP8266</code> and <code>SparkFun Thing Dev</code> boards.</p>
+
+<p>
+  This page will guide you through using your ESP8266 board for the first time, help you set up your computer to program your ESP8266 board, and it will also show you some of the capabilities of the boards.
+</p>
+
+<p>
+ We're using codebender, which not only features code-sharing, but also allows anyone to upload and debug Arduino sketches from within a web browser. Plus, it works on lower-tech machines, like Chromebooks!
+</p>
+
+<p>
+  Before starting, you need to install the right Browser Plugin. Click <a href="https://chrome.google.com/webstore/detail/codebender-app/magknjdfniglanojbpadmpjlglepnlko" target="_blank">here for Chrome</a> or <a href="https://codebender.cc/codebender.xpi">here for Firefox</a>.
+</p>
+
+<p>
+  Now, look at the code below. It's the most basic code example for electronics, and it Blinks an LED on your ESP8266 board.
+<p>
+
+<iframe id="blink-proteus-iframe" style="height: 510px; width: 100%; margin: 10px 0 10px;" allowTransparency="true" src="https://esp8266-proteus.codebender.cc/" frameborder="0"></iframe>
+
+<h3><a class="anchor" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Hello World</h3>
+<p>
+  Another one of the most simple programs you can write is the Hello World program. This sends data from your ChipKIT board to your computer
+</p>
+
+<iframe id="helloworld-proteus-iframe" style="height: 510px; width: 100%; margin: 10px 0 10px;" allowTransparency="true" src="https://esp8266-proteus.codebender.cc/" frameborder="0"></iframe>
+
+<p>
+  The code itself is pretty easy to understand. Go ahead, click <b>Flash</b> to load this code to your board.
+</p>
+
+<p>After uploading, go to the embedded serial monitor below, set the baud rate to 115200 bps, and click Connect. You should start getting data from your ChipKIT board.</p>
+
+<iframe style="height: 510px; width: 100%; margin: 10px 0 10px;" allowTransparency="true" src="https://codebender.cc/embed/serialmonitor" frameborder="0"></iframe>
+
+<h3><a class="anchor" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>WiFi Scan</h3>
+
+<p>Now let's do something a little more interesting! Program the following code to scan for the surrounding WiFi Networks, and print them on the Serial Monitor.</p>
+
+<iframe id="scan-proteus-iframe" style="height: 510px; width: 100%; margin: 10px 0 10px;" allowTransparency="true" src="https://esp8266-proteus.codebender.cc/" frameborder="0"></iframe>
+
+<p>Once again, go to the embedded serial monitor below, set the baud rate to 115200 bps, and click Connect. You should see the board scanning for surrounding WiFi Networks and listing them on the Serial Monitor</p>
+
+<iframe style="height: 510px; width: 100%; margin: 10px 0 10px;" allowTransparency="true" src="https://codebender.cc/embed/serialmonitor" frameborder="0"></iframe>
+
+<h3><a class="anchor" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Connecting to a network</h3>
+
+<p>Time for some real action. After getting the list of WiFi password, how about we connect to one? Below is a good example. Change it to the correct WiFi Network Name (SSID) & Password, and Flash.</p>
+
+<iframe id="wifi-proteus-iframe" style="height: 510px; width: 100%; margin: 10px 0 10px;" allowTransparency="true" src="https://esp8266-proteus.codebender.cc/" frameborder="0"></iframe>
+
+<p>You might also want to open the Serial Monitor again, to look at the debugging info of what the program is doing.</p>
+
+<iframe style="height: 510px; width: 100%; margin: 10px 0 10px;" allowTransparency="true" src="https://codebender.cc/embed/serialmonitor" frameborder="0"></iframe>
+
+        </section>
+
+        <aside id="sidebar">
+          <p class="repo-owner">This page is maintained by <a href="https://github.com/codebendercc">codebendercc</a>.</p>
+          <p>Useful Links:
+          <ul>
+            <li><a href="http://www.esp8266.com/">ESP8266 Community Forum</a></li>
+            <li><a href="http://www.espressif.com/">Espressif's Official Site</a></li>
+            <li><a href="https://www.reddit.com/r/esp8266/">ESP8266 Reddit Forum</a></li>
+            <li><a href="https://www.reddit.com/r/arduino/">Arduino Reddit Forum</a></li>
+            <li><a href="https://www.sparkfun.com">SparkFun Electronics</a></li>
+            <li><a href="https://www.adafruit.com">Adafruit Industries</a></li>
+            </ul>
+            </p>
+        </aside>
+
+      </div>
+    </div>
+
+  
+  </body>
+</html>

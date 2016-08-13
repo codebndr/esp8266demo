@@ -198,31 +198,31 @@ function codebenderInit() {
     loadingCodebenderClient.setFilelist(loadingCodebenderFilelist);
     // helloworldCodebenderClient.setCloneUrl('http://chipkitdemo.codebender.cc/dashboard/#/ide/wksp-helloworld');
 
-    // ESP8266 codebender editor
-    var scanOptions = {
-        id: 2,
-        CODEBENDER_DOMAIN: 'https://esp8266-proteus.codebender.cc',
-        iframe: document.getElementById('scan-proteus-iframe').contentWindow
-    };
-    var scanCodebenderClient = new CodebenderClient(scanOptions);
-    var scanCodebenderFilelist = {
-        'WiFi Scan.ino': '/*\n *  This sketch demonstrates how to scan WiFi networks. \n *  The API is almost the same as with the WiFi Shield library, \n *  the most obvious difference being the different file you need to include:\n */\n#include "ESP8266WiFi.h"\n\nvoid setup() {\n  Serial.begin(115200);\n\n  // Set WiFi to station mode and disconnect from an AP if it was previously connected\n  WiFi.mode(WIFI_STA);\n  WiFi.disconnect();\n  delay(100);\n\n  Serial.println("Setup done");\n}\n\nvoid loop() {\n  Serial.println("scan start");\n\n  // WiFi.scanNetworks will return the number of networks found\n  int n = WiFi.scanNetworks();\n  Serial.println("scan done");\n  if (n == 0)\n    Serial.println("no networks found");\n  else\n  {\n    Serial.print(n);\n    Serial.println(" networks found");\n    for (int i = 0; i < n; ++i)\n    {\n      // Print SSID and RSSI for each network found\n      Serial.print(i + 1);\n      Serial.print(": ");\n      Serial.print(WiFi.SSID(i));\n      Serial.print(" (");\n      Serial.print(WiFi.RSSI(i));\n      Serial.print(")");\n      Serial.println((WiFi.encryptionType(i) == ENC_TYPE_NONE)?" ":"*");\n      delay(10);\n    }\n  }\n  Serial.println("");\n\n  // Wait a bit before scanning again\n  delay(5000);\n}'
-    };
-    scanCodebenderClient.setFilelist(scanCodebenderFilelist);
-    // scanCodebenderClient.setCloneUrl('http://chipkitdemo.codebender.cc/dashboard/#/ide/wksp-scan');
+    // // ESP8266 codebender editor
+    // var scanOptions = {
+    //     id: 2,
+    //     CODEBENDER_DOMAIN: 'https://esp8266-proteus.codebender.cc',
+    //     iframe: document.getElementById('scan-proteus-iframe').contentWindow
+    // };
+    // var scanCodebenderClient = new CodebenderClient(scanOptions);
+    // var scanCodebenderFilelist = {
+    //     'WiFi Scan.ino': '/*\n *  This sketch demonstrates how to scan WiFi networks. \n *  The API is almost the same as with the WiFi Shield library, \n *  the most obvious difference being the different file you need to include:\n */\n#include "ESP8266WiFi.h"\n\nvoid setup() {\n  Serial.begin(115200);\n\n  // Set WiFi to station mode and disconnect from an AP if it was previously connected\n  WiFi.mode(WIFI_STA);\n  WiFi.disconnect();\n  delay(100);\n\n  Serial.println("Setup done");\n}\n\nvoid loop() {\n  Serial.println("scan start");\n\n  // WiFi.scanNetworks will return the number of networks found\n  int n = WiFi.scanNetworks();\n  Serial.println("scan done");\n  if (n == 0)\n    Serial.println("no networks found");\n  else\n  {\n    Serial.print(n);\n    Serial.println(" networks found");\n    for (int i = 0; i < n; ++i)\n    {\n      // Print SSID and RSSI for each network found\n      Serial.print(i + 1);\n      Serial.print(": ");\n      Serial.print(WiFi.SSID(i));\n      Serial.print(" (");\n      Serial.print(WiFi.RSSI(i));\n      Serial.print(")");\n      Serial.println((WiFi.encryptionType(i) == ENC_TYPE_NONE)?" ":"*");\n      delay(10);\n    }\n  }\n  Serial.println("");\n\n  // Wait a bit before scanning again\n  delay(5000);\n}'
+    // };
+    // scanCodebenderClient.setFilelist(scanCodebenderFilelist);
+    // // scanCodebenderClient.setCloneUrl('http://chipkitdemo.codebender.cc/dashboard/#/ide/wksp-scan');
 
-    // ESP8266 codebender editor
-    var wifiOptions = {
-        id: 3,
-        CODEBENDER_DOMAIN: 'https://esp8266-proteus.codebender.cc',
-        iframe: document.getElementById('wifi-proteus-iframe').contentWindow
-    };
-    var wifiCodebenderClient = new CodebenderClient(wifiOptions);
-    var wifiCodebenderFilelist = {
-        'WiFi Client.ino': '/*\n *  This sketch sends a message to a TCP server\n *\n */\n\n#include &ltESP8266WiFi.h&gt;\n#include &lt;ESP8266WiFiMulti.h&gt;\n\nESP8266WiFiMulti WiFiMulti;\n\nvoid setup() {\n    Serial.begin(115200);\n    delay(10);\n\n    // We start by connecting to a WiFi network\n    WiFiMulti.addAP("SSID", "passpasspass");\n\n    Serial.println();\n    Serial.println();\n    Serial.print("Wait for WiFi... ");\n\n    while(WiFiMulti.run() != WL_CONNECTED) {\n        Serial.print(".");\n        delay(500);\n    }\n\n    Serial.println("");\n    Serial.println("WiFi connected");\n    Serial.println("IP address: ");\n    Serial.println(WiFi.localIP());\n\n    delay(500);\n}\n\n\nvoid loop() {\n    const uint16_t port = 80;\n    const char * host = "192.168.1.1"; // ip or dns\n\n    \n    \n    Serial.print("connecting to ");\n    Serial.println(host);\n\n    // Use WiFiClient class to create TCP connections\n    WiFiClient client;\n\n    if (!client.connect(host, port)) {\n        Serial.println("connection failed");\n        Serial.println("wait 5 sec...");\n        delay(5000);\n        return;\n    }\n\n    // This will send the request to the server\n    client.print("Send this data to server");\n\n    //read back one line from server\n    String line = client.readStringUntil(\'\r\');\n    client.println(line);\n\n    Serial.println("closing connection");\n    client.stop();\n    \n    Serial.println("wait 5 sec...");\n    delay(5000);\n}\n'
-    };
-    wifiCodebenderClient.setFilelist(wifiCodebenderFilelist);
-    // scanCodebenderClient.setCloneUrl('http://chipkitdemo.codebender.cc/dashboard/#/ide/wksp-scan');
+    // // ESP8266 codebender editor
+    // var wifiOptions = {
+    //     id: 3,
+    //     CODEBENDER_DOMAIN: 'https://esp8266-proteus.codebender.cc',
+    //     iframe: document.getElementById('wifi-proteus-iframe').contentWindow
+    // };
+    // var wifiCodebenderClient = new CodebenderClient(wifiOptions);
+    // var wifiCodebenderFilelist = {
+    //     'WiFi Client.ino': '/*\n *  This sketch sends a message to a TCP server\n *\n */\n\n#include &ltESP8266WiFi.h&gt;\n#include &lt;ESP8266WiFiMulti.h&gt;\n\nESP8266WiFiMulti WiFiMulti;\n\nvoid setup() {\n    Serial.begin(115200);\n    delay(10);\n\n    // We start by connecting to a WiFi network\n    WiFiMulti.addAP("SSID", "passpasspass");\n\n    Serial.println();\n    Serial.println();\n    Serial.print("Wait for WiFi... ");\n\n    while(WiFiMulti.run() != WL_CONNECTED) {\n        Serial.print(".");\n        delay(500);\n    }\n\n    Serial.println("");\n    Serial.println("WiFi connected");\n    Serial.println("IP address: ");\n    Serial.println(WiFi.localIP());\n\n    delay(500);\n}\n\n\nvoid loop() {\n    const uint16_t port = 80;\n    const char * host = "192.168.1.1"; // ip or dns\n\n    \n    \n    Serial.print("connecting to ");\n    Serial.println(host);\n\n    // Use WiFiClient class to create TCP connections\n    WiFiClient client;\n\n    if (!client.connect(host, port)) {\n        Serial.println("connection failed");\n        Serial.println("wait 5 sec...");\n        delay(5000);\n        return;\n    }\n\n    // This will send the request to the server\n    client.print("Send this data to server");\n\n    //read back one line from server\n    String line = client.readStringUntil(\'\r\');\n    client.println(line);\n\n    Serial.println("closing connection");\n    client.stop();\n    \n    Serial.println("wait 5 sec...");\n    delay(5000);\n}\n'
+    // };
+    // wifiCodebenderClient.setFilelist(wifiCodebenderFilelist);
+    // // scanCodebenderClient.setCloneUrl('http://chipkitdemo.codebender.cc/dashboard/#/ide/wksp-scan');
 
 }
 
@@ -292,25 +292,25 @@ window.onload = codebenderInit;
 
 <iframe style="height: 510px; width: 100%; margin: 10px 0 10px;" allowTransparency="true" src="https://codebender.cc/embed/serialmonitor" frameborder="0"></iframe>
 
-<h3><a class="anchor" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>WiFi Scan</h3>
+<!--<h3><a class="anchor" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>WiFi Scan</h3>-->
 
-<p>Now let's do something a little more interesting! Program the following code to scan for the surrounding WiFi Networks, and print them on the Serial Monitor.</p>
+<!--<p>Now let's do something a little more interesting! Program the following code to scan for the surrounding WiFi Networks, and print them on the Serial Monitor.</p>-->
 
-<iframe id="scan-proteus-iframe" style="height: 510px; width: 100%; margin: 10px 0 10px;" allowTransparency="true" src="https://esp8266-proteus.codebender.cc/" frameborder="0"></iframe>
+<!--<iframe id="scan-proteus-iframe" style="height: 510px; width: 100%; margin: 10px 0 10px;" allowTransparency="true" src="https://esp8266-proteus.codebender.cc/" frameborder="0"></iframe>-->
 
-<p>Once again, go to the embedded serial monitor below, set the baud rate to 115200 bps, and click Connect. You should see the board scanning for surrounding WiFi Networks and listing them on the Serial Monitor</p>
+<!--<p>Once again, go to the embedded serial monitor below, set the baud rate to 115200 bps, and click Connect. You should see the board scanning for surrounding WiFi Networks and listing them on the Serial Monitor</p>-->
 
-<iframe style="height: 510px; width: 100%; margin: 10px 0 10px;" allowTransparency="true" src="https://codebender.cc/embed/serialmonitor" frameborder="0"></iframe>
+<!--<iframe style="height: 510px; width: 100%; margin: 10px 0 10px;" allowTransparency="true" src="https://codebender.cc/embed/serialmonitor" frameborder="0"></iframe>-->
 
-<h3><a class="anchor" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Connecting to a network</h3>
+<!--<h3><a class="anchor" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Connecting to a network</h3>-->
 
-<p>Time for some real action. After getting the list of WiFi password, how about we connect to one? Below is a good example. Change it to the correct WiFi Network Name (SSID) & Password, and Flash.</p>
+<!--<p>Time for some real action. After getting the list of WiFi password, how about we connect to one? Below is a good example. Change it to the correct WiFi Network Name (SSID) & Password, and Flash.</p>-->
 
-<iframe id="wifi-proteus-iframe" style="height: 510px; width: 100%; margin: 10px 0 10px;" allowTransparency="true" src="https://esp8266-proteus.codebender.cc/" frameborder="0"></iframe>
+<!--<iframe id="wifi-proteus-iframe" style="height: 510px; width: 100%; margin: 10px 0 10px;" allowTransparency="true" src="https://esp8266-proteus.codebender.cc/" frameborder="0"></iframe>-->
 
-<p>You might also want to open the Serial Monitor again, to look at the debugging info of what the program is doing.</p>
+<!--<p>You might also want to open the Serial Monitor again, to look at the debugging info of what the program is doing.</p>-->
 
-<iframe style="height: 510px; width: 100%; margin: 10px 0 10px;" allowTransparency="true" src="https://codebender.cc/embed/serialmonitor" frameborder="0"></iframe>
+<!--<iframe style="height: 510px; width: 100%; margin: 10px 0 10px;" allowTransparency="true" src="https://codebender.cc/embed/serialmonitor" frameborder="0"></iframe>-->
 
         </section>
 

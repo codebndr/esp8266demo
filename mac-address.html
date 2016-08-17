@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <title>ESP8266 Demo</title>
+  </head>
+
+  <body>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+  <script>
+    /**
+ * CodebenderClient
+ * Front-end client for the embedded views
+ * @param options object Configuration options for the client
+ */
+function CodebenderClient(options) {
+    /**
+     * Client ID
+     * Shared between the parent frame and the iframe
+     * Usefull for the parent to identify the source iframe of a message
+     * when multiple iframes exists on its page
+     */
+    this.id = options.id ? options.id : 0;
+    /**
+     * URL of the codebender.cc domain
+     * Used when transmitting messages to the iframe
+     */
+    this.CODEBENDER_DOMAIN = options.CODEBENDER_DOMAIN ? options.CODEBENDER_DOMAIN : 'http://localhost';
+    /**
+     * Template for the messages sent to the iframe
+     */
+    this.CODEBENDER_MESSAGE = {
+        /**
+         * Service name.
+         * Used by the iframe to check if the message must be processed
+         */
+        service: 'codebender.cc',
+        /**
+         * Action name.
+         * Used by the iframe to identify the action related to the received message
+         */
+        action: '',
+        /**
+         * Client ID
+         */
+        id: this.id
+    };
+    /**
+     * Setup DOM elements
+     */
+    this.iframe = options.iframe ? options.iframe : null;
+    if (options.verify) {
+        this.$verify = $(options.verify);
+    }
+    if (options.restore) {
+        this.$restore = $(options.restore);
+    }
+    if (options.operationOutput) {
+        this.$operationOutput = $(options.operationOutput);
+    }
+    // Start the event listeners
+    this.startEventListeners();
+}
+/**
+ * Starts the event listeners of the client
+ */
+CodebenderClient.prototype.startEventListeners = function () {
+    var self = this;
+    // Listener for the received messages from the iframe
+    $(window).on('message', this.messageHandler.bind(self));
+    // Listener for the Verify button
+    if (this.$verify) {
+        this.$verify.on('click', this.verifyHandler.bind(self));
+    }
+    // Listener for the restore button
+    if (this.$restore) {
+        this.$restore.on('click', this.restoreHandler.bind(self));
+    }
+};
+/**
+ * Sends a message to the iframe
+ * @param message object Message to send
+ */
+CodebenderClient.prototype.sendMessage = function (message) {
+    message = JSON.stringify(message);
+    if (this.iframe) {
+        this.iframe.postMessage(message, this.CODEBENDER_DOMAIN);
+    }
+};
+/**
+ * Handler for the messages received from the iframe
+ * @param event Event object of the message event
+ */
+CodebenderClient.prototype.messageHandler = function (event) {
+    try {
+        var origin = event.originalEvent.origin;
+        if (origin !== this.CODEBENDER_DOMAIN) {
+            return;
+        }
+
+        var data = event.originalEvent.data;
+        var message = JSON.parse(data);
+        if (message.service === 'codebender.cc' && message.response) {
+            if (message.action === 'operation-output' && this.$operationOutput) {
+                this.$operationOutput.html(message.response);
+            }
+        }
+    }
+    catch (error) {
+    }
+};
+/**
+ * Handler for the Verify button
+ */
+CodebenderClient.prototype.verifyHandler = function () {
+    var message = this.CODEBENDER_MESSAGE;
+    message.action = 'verify';
+    this.sendMessage(message);
+};
+/**
+ * Handler for the Restore button
+ */
+CodebenderClient.prototype.restoreHandler = function () {
+    var message = this.CODEBENDER_MESSAGE;
+    message.action = 'restore';
+    this.sendMessage(message);
+};
+/**
+ * Sets the filelist inside the iframe
+ * @param filelist object The filelist to set
+ */
+CodebenderClient.prototype.setFilelist = function (filelist) {
+    var message = this.CODEBENDER_MESSAGE;
+    message.filelist = filelist;
+    message.action = 'set-filelist';
+    this.sendMessage(message);
+};
+/**
+ * Gets the filelist from the iframe
+ */
+CodebenderClient.prototype.getFilelist = function () {
+    var message = this.CODEBENDER_MESSAGE;
+    message.action = 'get-filelist';
+    this.sendMessage(message);
+};
+/**
+ * Sets the Clone URL
+ */
+CodebenderClient.prototype.setCloneUrl = function (url) {
+  var message = this.CODEBENDER_MESSAGE;
+  message.action = 'set-clone-url';
+  message.cloneUrl = url;
+  this.sendMessage(message);
+};
+  </script>
+
+  <script>
+function codebenderInit() {
+    // ESP8266 codebender editor
+    var storingOptions = {
+        id: 0,
+        CODEBENDER_DOMAIN: 'https://esp8266-proteus.codebender.cc',
+        iframe: document.getElementById('storing-proteus-iframe').contentWindow
+    };
+    var storingCodebenderClient = new CodebenderClient(storingOptions);
+    var storingCodebenderFilelist = {
+        'Network Settings Storing.ino': '#include &lt;ESP8266WiFi.h&gt;\n#include &lt;ESP8266WiFiMulti.h&gt;\n\n#include &lt;FS.h&gt;\n\n#include "SPIFFSWiFiCredentials.hpp"\n\nESP8266WiFiMulti WiFiMulti;\n\nvoid setup() {\n  // put your setup code here, to run once:\n  Serial.begin(115200);\n\n  SPIFFSWiFiCredentials::begin();\n\n  SPIFFSWiFiCredentials::addSSID("ssid","password");\n\n  Serial.println("=======");\n  \n  SPIFFSWiFiCredentials::save();\n\n  Serial.println("=====================");\n\n  SPIFFSWiFiCredentials::load(WiFiMulti);\n}\n\nvoid loop() {\n  // put your main code here, to run repeatedly:\n    if ((WiFiMulti.run() == WL_CONNECTED))\n    {\n\n      Serial.println("CONNECTED");\n    }\n    else\n    {\n      Serial.println("NOT CONNECTED");\n    }\n\n      delay(1000);\n}',
+        'SPIFFSWiFiCredentials.hpp' : '#include &lt;Arduino.h&gt;\n\n/*#include &lt;String.h&gt;*/\n\n#include &lt;ESP8266WiFi.h&gt;\n#include &lt;ESP8266WiFiMulti.h&gt;\n\nclass SPIFFSWiFiCredentials\n{\n  public:  \n  SPIFFSWiFiCredentials(void);\n  static void begin(void);\n  static void addSSID(String ssid, String password);\n  static void save(void);\n  static void load(ESP8266WiFiMulti &WiFiMulti);\n\n  private:\n  static void saveDataToFile(String fileNameForSave, String DataToSave);\n  static String loadDataFromFile(String fileNameForOpen);\n\n  static String credentialsString;\n};\n',
+        'SPIFFSWiFiCredentials.cpp' : '\n#include "SPIFFSWiFiCredentials.hpp"\n#include &lt;FS.h&gt;\n\nString SPIFFSWiFiCredentials::credentialsString;\n\nvoid SPIFFSWiFiCredentials::begin(void)\n{\n  SPIFFS.begin();\n}\n\nvoid SPIFFSWiFiCredentials::addSSID(String ssid, String password)\n{\n  Serial.println("Adding SSID:     " + ssid);\n  Serial.println("       Password: " + (password == ""? "***NO PASSWORD***": password));\n\n  credentialsString += ssid + "\\n" + password + "\\n";\n//  Serial.print("Credentials String:\\n" + SPIFFSWiFiCredentials::credentialsString);\n}\n\nvoid SPIFFSWiFiCredentials::save(void)\n{\n  SPIFFSWiFiCredentials::saveDataToFile("credentials", credentialsString);\n}\n\nvoid SPIFFSWiFiCredentials::load(ESP8266WiFiMulti &WiFiMulti)\n{\n  String credentials = SPIFFSWiFiCredentials::loadDataFromFile("credentials");  \n\n//  Serial.println("creds loaded: ");\n//  Serial.println(credentials);\n\n  int done = false;\n  int indexOfNewline;\n  while(!done)\n  {\n    indexOfNewline = credentials.indexOf(\'\\n\');\n    if(indexOfNewline == -1)\n    {\n      done = true;\n      continue;\n    }\n    String ssid = credentials.substring(0, indexOfNewline);\n\n    credentials = credentials.substring(indexOfNewline+1);\n\n    indexOfNewline = credentials.indexOf(\'\\n\');\n    if(indexOfNewline == -1)\n    {\n      done = true;\n      continue;\n    }\n    String password = credentials.substring(0, indexOfNewline);\n    \n    credentials = credentials.substring(indexOfNewline+1);\n\n    Serial.println("Setting up WiFi SSID");\n    Serial.println("SSID:     " + ssid);\n    Serial.println("Password: " + (password == ""? "***NO PASSWORD***": password));\n\n    char bufferArray[2][20];\n    ssid.toCharArray(bufferArray[0], 20);\n    password.toCharArray(bufferArray[1], 20);\n\n    WiFiMulti.addAP(bufferArray[0], bufferArray[1]);\n\n//    Serial.println("credentials are now:\\n" + credentials);\n//    done = true;\n  }\n}\n\nvoid SPIFFSWiFiCredentials::saveDataToFile(String fileNameForSave, String DataToSave)\n{\n  String filePath = String("/data/" + fileNameForSave+ ".dat");\n  Serial.println("Saving File:  " + filePath);\n\n  //SPIFFS.begin();\n  File f = SPIFFS.open(filePath, "w");\n  if (!f)\n  {\n    Serial.println(F("file open failed"));\n  }\n  else\n  {\n    f.println(String(DataToSave + String(\'\\r\')));\n    f.close();\n  }\n  return;\n}\n\nString SPIFFSWiFiCredentials::loadDataFromFile(String fileNameForOpen)\n{\n  String filePath = String("/data/" + fileNameForOpen+ ".dat");\n  Serial.println("Loading File: " + filePath);\n\n  int fileOpenFail;\n  String WhatIwillReturn;\n  //SPIFFS.begin();\n  File f = SPIFFS.open(filePath, "r");\n  if (!f)\n  {\n    fileOpenFail = 1;\n    //Serial.print("file open failed  :");\n    //Serial.println(fileNameForOpen);\n  }\n  else\n  {\n    fileOpenFail = 0;\n    WhatIwillReturn =  f.readStringUntil(\'\\r\');\n//    WhatIwillReturn.replace("\\n", "");\n    f.close();\n    return WhatIwillReturn;\n  }\n}'
+    };
+    storingCodebenderClient.setFilelist(storingCodebenderFilelist);
+    // blinkCodebenderClient.setCloneUrl('http://chipkitdemo.codebender.cc/dashboard/#/ide/wksp-blink');
+    
+    
+    // ESP8266 codebender editor
+    var loadingOptions = {
+        id: 1,
+        CODEBENDER_DOMAIN: 'https://esp8266-proteus.codebender.cc',
+        iframe: document.getElementById('loading-proteus-iframe').contentWindow
+    };
+    var loadingCodebenderClient = new CodebenderClient(loadingOptions);
+    var loadingCodebenderFilelist = {
+        'Network Settings Loading.ino': '#include &lt;ESP8266WiFi.h&gt;\n#include &lt;ESP8266WiFiMulti.h&gt;\n\n#include &lt;FS.h&gt;\n\n#include "SPIFFSWiFiCredentials.hpp"\n\nESP8266WiFiMulti WiFiMulti;\n\nvoid setup() {\n  // put your setup code here, to run once:\n  Serial.begin(115200);\n\n  SPIFFSWiFiCredentials::begin();\n  SPIFFSWiFiCredentials::load(WiFiMulti);\n}\n\nvoid loop() {\n  // put your main code here, to run repeatedly:\n    if ((WiFiMulti.run() == WL_CONNECTED))\n    {\n\n      Serial.println("CONNECTED");\n    }\n    else\n    {\n      Serial.println("NOT CONNECTED");\n    }\n\n      delay(1000);\n}',
+        'SPIFFSWiFiCredentials.hpp' : '#include &lt;Arduino.h&gt;\n\n/*#include &lt;String.h&gt;*/\n\n#include &lt;ESP8266WiFi.h&gt;\n#include &lt;ESP8266WiFiMulti.h&gt;\n\nclass SPIFFSWiFiCredentials\n{\n  public:  \n  SPIFFSWiFiCredentials(void);\n  static void begin(void);\n  static void addSSID(String ssid, String password);\n  static void save(void);\n  static void load(ESP8266WiFiMulti &WiFiMulti);\n\n  private:\n  static void saveDataToFile(String fileNameForSave, String DataToSave);\n  static String loadDataFromFile(String fileNameForOpen);\n\n  static String credentialsString;\n};\n',
+        'SPIFFSWiFiCredentials.cpp' : '\n#include "SPIFFSWiFiCredentials.hpp"\n#include &lt;FS.h&gt;\n\nString SPIFFSWiFiCredentials::credentialsString;\n\nvoid SPIFFSWiFiCredentials::begin(void)\n{\n  SPIFFS.begin();\n}\n\nvoid SPIFFSWiFiCredentials::addSSID(String ssid, String password)\n{\n  Serial.println("Adding SSID:     " + ssid);\n  Serial.println("       Password: " + (password == ""? "***NO PASSWORD***": password));\n\n  credentialsString += ssid + "\\n" + password + "\\n";\n//  Serial.print("Credentials String:\\n" + SPIFFSWiFiCredentials::credentialsString);\n}\n\nvoid SPIFFSWiFiCredentials::save(void)\n{\n  SPIFFSWiFiCredentials::saveDataToFile("credentials", credentialsString);\n}\n\nvoid SPIFFSWiFiCredentials::load(ESP8266WiFiMulti &WiFiMulti)\n{\n  String credentials = SPIFFSWiFiCredentials::loadDataFromFile("credentials");  \n\n//  Serial.println("creds loaded: ");\n//  Serial.println(credentials);\n\n  int done = false;\n  int indexOfNewline;\n  while(!done)\n  {\n    indexOfNewline = credentials.indexOf(\'\\n\');\n    if(indexOfNewline == -1)\n    {\n      done = true;\n      continue;\n    }\n    String ssid = credentials.substring(0, indexOfNewline);\n\n    credentials = credentials.substring(indexOfNewline+1);\n\n    indexOfNewline = credentials.indexOf(\'\\n\');\n    if(indexOfNewline == -1)\n    {\n      done = true;\n      continue;\n    }\n    String password = credentials.substring(0, indexOfNewline);\n    \n    credentials = credentials.substring(indexOfNewline+1);\n\n    Serial.println("Setting up WiFi SSID");\n    Serial.println("SSID:     " + ssid);\n    Serial.println("Password: " + (password == ""? "***NO PASSWORD***": password));\n\n    char bufferArray[2][20];\n    ssid.toCharArray(bufferArray[0], 20);\n    password.toCharArray(bufferArray[1], 20);\n\n    WiFiMulti.addAP(bufferArray[0], bufferArray[1]);\n\n//    Serial.println("credentials are now:\\n" + credentials);\n//    done = true;\n  }\n}\n\nvoid SPIFFSWiFiCredentials::saveDataToFile(String fileNameForSave, String DataToSave)\n{\n  String filePath = String("/data/" + fileNameForSave+ ".dat");\n  Serial.println("Saving File:  " + filePath);\n\n  //SPIFFS.begin();\n  File f = SPIFFS.open(filePath, "w");\n  if (!f)\n  {\n    Serial.println(F("file open failed"));\n  }\n  else\n  {\n    f.println(String(DataToSave + String(\'\\r\')));\n    f.close();\n  }\n  return;\n}\n\nString SPIFFSWiFiCredentials::loadDataFromFile(String fileNameForOpen)\n{\n  String filePath = String("/data/" + fileNameForOpen+ ".dat");\n  Serial.println("Loading File: " + filePath);\n\n  int fileOpenFail;\n  String WhatIwillReturn;\n  //SPIFFS.begin();\n  File f = SPIFFS.open(filePath, "r");\n  if (!f)\n  {\n    fileOpenFail = 1;\n    //Serial.print("file open failed  :");\n    //Serial.println(fileNameForOpen);\n  }\n  else\n  {\n    fileOpenFail = 0;\n    WhatIwillReturn =  f.readStringUntil(\'\\r\');\n//    WhatIwillReturn.replace("\\n", "");\n    f.close();\n    return WhatIwillReturn;\n  }\n}'
+    };
+    loadingCodebenderClient.setFilelist(loadingCodebenderFilelist);
+    // helloworldCodebenderClient.setCloneUrl('http://chipkitdemo.codebender.cc/dashboard/#/ide/wksp-helloworld');
+
+    // // ESP8266 codebender editor
+    // var scanOptions = {
+    //     id: 2,
+    //     CODEBENDER_DOMAIN: 'https://esp8266-proteus.codebender.cc',
+    //     iframe: document.getElementById('scan-proteus-iframe').contentWindow
+    // };
+    // var scanCodebenderClient = new CodebenderClient(scanOptions);
+    // var scanCodebenderFilelist = {
+    //     'WiFi Scan.ino': '/*\n *  This sketch demonstrates how to scan WiFi networks. \n *  The API is almost the same as with the WiFi Shield library, \n *  the most obvious difference being the different file you need to include:\n */\n#include "ESP8266WiFi.h"\n\nvoid setup() {\n  Serial.begin(115200);\n\n  // Set WiFi to station mode and disconnect from an AP if it was previously connected\n  WiFi.mode(WIFI_STA);\n  WiFi.disconnect();\n  delay(100);\n\n  Serial.println("Setup done");\n}\n\nvoid loop() {\n  Serial.println("scan start");\n\n  // WiFi.scanNetworks will return the number of networks found\n  int n = WiFi.scanNetworks();\n  Serial.println("scan done");\n  if (n == 0)\n    Serial.println("no networks found");\n  else\n  {\n    Serial.print(n);\n    Serial.println(" networks found");\n    for (int i = 0; i < n; ++i)\n    {\n      // Print SSID and RSSI for each network found\n      Serial.print(i + 1);\n      Serial.print(": ");\n      Serial.print(WiFi.SSID(i));\n      Serial.print(" (");\n      Serial.print(WiFi.RSSI(i));\n      Serial.print(")");\n      Serial.println((WiFi.encryptionType(i) == ENC_TYPE_NONE)?" ":"*");\n      delay(10);\n    }\n  }\n  Serial.println("");\n\n  // Wait a bit before scanning again\n  delay(5000);\n}'
+    // };
+    // scanCodebenderClient.setFilelist(scanCodebenderFilelist);
+    // // scanCodebenderClient.setCloneUrl('http://chipkitdemo.codebender.cc/dashboard/#/ide/wksp-scan');
+
+    // // ESP8266 codebender editor
+    // var wifiOptions = {
+    //     id: 3,
+    //     CODEBENDER_DOMAIN: 'https://esp8266-proteus.codebender.cc',
+    //     iframe: document.getElementById('wifi-proteus-iframe').contentWindow
+    // };
+    // var wifiCodebenderClient = new CodebenderClient(wifiOptions);
+    // var wifiCodebenderFilelist = {
+    //     'WiFi Client.ino': '/*\n *  This sketch sends a message to a TCP server\n *\n */\n\n#include &ltESP8266WiFi.h&gt;\n#include &lt;ESP8266WiFiMulti.h&gt;\n\nESP8266WiFiMulti WiFiMulti;\n\nvoid setup() {\n    Serial.begin(115200);\n    delay(10);\n\n    // We start by connecting to a WiFi network\n    WiFiMulti.addAP("SSID", "passpasspass");\n\n    Serial.println();\n    Serial.println();\n    Serial.print("Wait for WiFi... ");\n\n    while(WiFiMulti.run() != WL_CONNECTED) {\n        Serial.print(".");\n        delay(500);\n    }\n\n    Serial.println("");\n    Serial.println("WiFi connected");\n    Serial.println("IP address: ");\n    Serial.println(WiFi.localIP());\n\n    delay(500);\n}\n\n\nvoid loop() {\n    const uint16_t port = 80;\n    const char * host = "192.168.1.1"; // ip or dns\n\n    \n    \n    Serial.print("connecting to ");\n    Serial.println(host);\n\n    // Use WiFiClient class to create TCP connections\n    WiFiClient client;\n\n    if (!client.connect(host, port)) {\n        Serial.println("connection failed");\n        Serial.println("wait 5 sec...");\n        delay(5000);\n        return;\n    }\n\n    // This will send the request to the server\n    client.print("Send this data to server");\n\n    //read back one line from server\n    String line = client.readStringUntil(\'\r\');\n    client.println(line);\n\n    Serial.println("closing connection");\n    client.stop();\n    \n    Serial.println("wait 5 sec...");\n    delay(5000);\n}\n'
+    // };
+    // wifiCodebenderClient.setFilelist(wifiCodebenderFilelist);
+    // // scanCodebenderClient.setCloneUrl('http://chipkitdemo.codebender.cc/dashboard/#/ide/wksp-scan');
+
+}
+
+
+window.onload = codebenderInit;
+
+  </script>
+    <header>
+      <div class="inner">
+        <h1>ESP826 Demo</h1>
+        <h2></h2>
+      </div>
+    </header>
+
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+
+<h3><a class="anchor" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Over-the-Air Updates!</h3>
+
+<p>That's right. Time to get this party started! What we're going to do this time is set up the ESP8266 with Over-the-Air updates. This allows us to program any ESP8266 board, anywhere in the world, with a new version of the software, or a different program.</p>
+
+<p>Once again, please note that this page is currently available for the <code>Adafruit HUZZAH ESP8266</code> and <code>SparkFun Thing Dev</code> boards.</p>
+
+<p>
+  Also, before starting, you need to install the right Browser Plugin if you haven't yet. Click <a href="https://chrome.google.com/webstore/detail/codebender-app/magknjdfniglanojbpadmpjlglepnlko" target="_blank">here for Chrome</a> or <a href="https://codebender.cc/codebender.xpi">here for Firefox</a>.
+</p>
+
+<h3><a class="anchor" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Network Configuration Issues</h3>
+
+<p>
+  Now, first things first. One of the problems with having a bunch of devices all around the world is that they're all connected to different WiFi networks, with different credentials. And when we update them, we need to make sure each of the boards keeps their network settings.
+</p>
+
+<p>
+  To go around that problem, we're going to use ESP8266's SPIFFS feature. SPIFFS is essentially a small filesystem that run's on your board's Flash memory. What we'll do is that we'll set up a sketch that saves the network settings in that filesystem, and then afterwards no matter what program we run on our ESP8266, we're going to tell it to look for the settings there.
+</p>
+
+<p>
+  What's even cooler is that we can specify more that one available networks, and the ESP8266 will try to connect to all of them, and it will even fall back to another network if it's disconnected from the current one.
+</p>
+
+<h3><a class="anchor" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Storing Network Settings</h3>
+
+<p>
+ Alright, so let's set up our networks. Change the code below with your own network settings, and add as many networks as you want.
+</p>
+
+<iframe id="storing-proteus-iframe" style="height: 510px; width: 100%; margin: 10px 0 10px;" allowTransparency="true" src="https://esp8266-proteus.codebender.cc/" frameborder="0"></iframe>
+
+<p>
+  After flashing, you'll want to open the Serial Monitor to make sure everything went smoothly. You should see your board writing the network settings in the filesystem, and then connecting successfully to one of the configured networks.
+</p>
+
+<iframe style="height: 510px; width: 100%; margin: 10px 0 10px;" allowTransparency="true" src="https://codebender.cc/embed/serialmonitor" frameborder="0"></iframe>
+        </section>
+
+        <aside id="sidebar">
+          <p class="repo-owner">This page is maintained by <a href="https://github.com/codebendercc">codebendercc</a>.</p>
+          <p>Useful Links:
+          <ul>
+            <li><a href="http://www.esp8266.com/">ESP8266 Community Forum</a></li>
+            <li><a href="http://www.espressif.com/">Espressif's Official Site</a></li>
+            <li><a href="https://www.reddit.com/r/esp8266/">ESP8266 Reddit Forum</a></li>
+            <li><a href="https://www.reddit.com/r/arduino/">Arduino Reddit Forum</a></li>
+            <li><a href="https://www.sparkfun.com">SparkFun Electronics</a></li>
+            <li><a href="https://www.adafruit.com">Adafruit Industries</a></li>
+            </ul>
+            </p>
+        </aside>
+
+      </div>
+    </div>
+
+  
+  </body>
+</html>

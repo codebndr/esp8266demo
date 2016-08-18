@@ -241,21 +241,19 @@ window.onload = codebenderInit;
       <div class="inner clearfix">
         <section id="main-content">
 
-<h3><a class="anchor" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Over-the-Air Updates!</h3>
-
-<p>That's right. Time to get this party started! What we're going to do this time is set up the ESP8266 with Over-the-Air updates. This allows us to program any ESP8266 board, anywhere in the world, with a new version of the software, or a different program.</p>
-
-<p>Once again, please note that this page is currently available for the <code>Adafruit HUZZAH ESP8266</code> and <code>SparkFun Thing Dev</code> boards.</p>
+<h3><a class="anchor" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Network Settings</h3>
 
 <p>
-  Also, before starting, you need to install the right Browser Plugin if you haven't yet. Click <a href="https://chrome.google.com/webstore/detail/codebender-app/magknjdfniglanojbpadmpjlglepnlko" target="_blank">here for Chrome</a> or <a href="https://codebender.cc/codebender.xpi">here for Firefox</a>.
+  OK, first things first. Remember that before starting, you need to install the right Browser Plugin if you haven't yet. Click <a href="https://chrome.google.com/webstore/detail/codebender-app/magknjdfniglanojbpadmpjlglepnlko" target="_blank">here for Chrome</a> or <a href="https://codebender.cc/codebender.xpi">here for Firefox</a>.
 </p>
 
-<h3><a class="anchor" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Network Configuration Issues</h3>
+<p>Also, once again, please note that this page is currently available for the <code>Adafruit HUZZAH ESP8266</code> and <code>SparkFun Thing Dev</code> boards.</p>
 
 <p>
-  Now, first things first. One of the problems with having a bunch of devices all around the world is that they're all connected to different WiFi networks, with different credentials. And when we update them, we need to make sure each of the boards keeps their network settings.
+  Now, here's the gist. One of the problems with having a bunch of devices all around the world is that they're all connected to different WiFi networks, with different credentials. And when we update them, we need to make sure each of the boards keeps their network settings.
 </p>
+
+<h3><a class="anchor" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Persistent Network Configuration</h3>
 
 <p>
   To go around that problem, we're going to use ESP8266's SPIFFS feature. SPIFFS is essentially a small filesystem that run's on your board's Flash memory. What we'll do is that we'll set up a sketch that saves the network settings in that filesystem, and then afterwards no matter what program we run on our ESP8266, we're going to tell it to look for the settings there.

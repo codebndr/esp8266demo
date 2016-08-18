@@ -212,7 +212,7 @@ window.onload = codebenderInit;
 <h3><a class="anchor" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Prerequisites</h3>
 
 <p>
- Just a reminder, this page assumes that you have an account for codebender's ESP8266 OTA Cloud IDE, and you have an API key.
+ Just a reminder, this page assumes that you have an account on codebender's ESP8266 OTA Cloud IDE, and that you have an API key.
 </p>
 
 <p>
@@ -226,13 +226,17 @@ window.onload = codebenderInit;
 <h3><a class="anchor" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>OTA Updates Setup</h3>
 
 <p>
- Lorem Ipsum
+ OK, time to roll! Go to your Dashboard and find your API Key. Copy that and replace the <code>CODEBENDER_API_KEY</code> placeholder text in <b>line 15</b> with your API Key. Now select your board, your port, and click Flash.
 </p>
 
 <iframe id="otasetup-proteus-iframe" style="height: 510px; width: 100%; margin: 10px 0 10px;" allowTransparency="true" src="https://esp8266-proteus.codebender.cc/" frameborder="0"></iframe>
 
 <p>
-  Lorem Ipsum
+  After Flashing, open the Serial Monitor at 115200 speed, and look for the messages. If you've done everything properly, you should see this:
+  <code>
+    Trying to fetch new binary
+    HTTP_UPDATE_NO_UPDATES
+  </code>
 </p>
 
 <iframe style="height: 510px; width: 100%; margin: 10px 0 10px;" allowTransparency="true" src="https://codebender.cc/embed/serialmonitor" frameborder="0"></iframe>

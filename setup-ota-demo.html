@@ -234,13 +234,28 @@ window.onload = codebenderInit;
 <p>
   After Flashing, open the Serial Monitor at 115200 speed, and look for the messages. If you've done everything properly, you should see this:
 </p>
-  <code>
-    Trying to fetch new binary<br>
-    HTTP_UPDATE_NO_UPDATES
-  </code>
+<code>
+  Trying to fetch new binary
+</code>
+<code>
+  HTTP_UPDATE_NO_UPDATES
+</code>
+
+<p>
+  This means that your device was properly configured, with the right API key, and it's just not finding any new binaries to download, since you haven't created any yet. We'll do that in the next step. If you don't see this, you've most probably missed a step. Scroll down for common issues.
+</p>
 
 <iframe style="height: 510px; width: 100%; margin: 10px 0 10px;" allowTransparency="true" src="https://codebender.cc/embed/serialmonitor" frameborder="0"></iframe>
 
+<h3><a class="anchor" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Common Issues</h3>
+
+<p>
+  If you're getting a different error, such as <code>HTTP_UPDATE_FAILED Error (-103): Forbidden (403)</code>, that means you either have the wrong API Key (or haven't provided on), or that you haven't added a device with the right address in your devices, so we can't find this device in our system.
+</p>
+
+<p>
+  If your device doesn't connect to the network, then you're either having network issues, or most probably your devices' network was not configured properly. Try running that step again and make sure it was successful.
+</p>
         </section>
 
         <aside id="sidebar">

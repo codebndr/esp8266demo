@@ -201,7 +201,7 @@ window.onload = codebenderInit;
 
 <h3><a class="anchor" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Over-the-Air Updates!</h3>
 
-<p>That's right. Time to get this party started! What we're going to do this time is set up the ESP8266 with Over-the-Air updates. This allows us to program any ESP8266 board, anywhere in the world, with a new version of the software, or a different program.</p>
+<p>Ok, time to get this party started! What we're going to do this time is set up the ESP8266 with Over-the-Air updates. This allows us to program any ESP8266 board, anywhere in the world, with a new version of the software, or a different program.</p>
 
 <p>Once again, please note that this page is currently available for the <code>Adafruit HUZZAH ESP8266</code> and <code>SparkFun Thing Dev</code> boards.</p>
 
@@ -209,38 +209,33 @@ window.onload = codebenderInit;
   Also, before starting, you need to install the right Browser Plugin if you haven't yet. Click <a href="https://chrome.google.com/webstore/detail/codebender-app/magknjdfniglanojbpadmpjlglepnlko" target="_blank">here for Chrome</a> or <a href="https://codebender.cc/codebender.xpi">here for Firefox</a>.
 </p>
 
-<h3><a class="anchor" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Network Configuration Issues</h3>
+<h3><a class="anchor" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Prerequisites</h3>
 
 <p>
-  Now, first things first. One of the problems with having a bunch of devices all around the world is that they're all connected to different WiFi networks, with different credentials. And when we update them, we need to make sure each of the boards keeps their network settings.
+ Just a reminder, this page assumes that you have an account for codebender's ESP8266 OTA Cloud IDE, and you have an API key.
 </p>
 
 <p>
-  To go around that problem, we're going to use ESP8266's SPIFFS feature. SPIFFS is essentially a small filesystem that run's on your board's Flash memory. What we'll do is that we'll set up a sketch that saves the network settings in that filesystem, and then afterwards no matter what program we run on our ESP8266, we're going to tell it to look for the settings there.
+  We also assume that you've already found your MAC Address and you've added a device with that MAC Address in your devices.
 </p>
 
 <p>
-  What's even cooler is that we can specify more that one available networks, and the ESP8266 will try to connect to all of them, and it will even fall back to another network if it's disconnected from the current one.
+  Last but not least, we assume that you've properly configured your network settings in the previous step, and that your board has stored the network config and connects successfully to the network.
 </p>
 
-<h3><a class="anchor" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Storing Network Settings</h3>
+<h3><a class="anchor" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>OTA Updates Setup</h3>
 
 <p>
- Alright, so let's set up our networks. Change the code below with your own network settings, and add as many networks as you want.
+ Lorem Ipsum
 </p>
 
 <iframe id="otasetup-proteus-iframe" style="height: 510px; width: 100%; margin: 10px 0 10px;" allowTransparency="true" src="https://esp8266-proteus.codebender.cc/" frameborder="0"></iframe>
 
 <p>
-  After flashing, you'll want to open the Serial Monitor to make sure everything went smoothly. You should see your board writing the network settings in the filesystem, and then connecting successfully to one of the configured networks.
+  Lorem Ipsum
 </p>
 
 <iframe style="height: 510px; width: 100%; margin: 10px 0 10px;" allowTransparency="true" src="https://codebender.cc/embed/serialmonitor" frameborder="0"></iframe>
-
-<h3><a class="anchor" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Loading Network Settings</h3>
-<p>
-  Now let's load a new program that will use the network settings we saved last time. Even though we've changed the program, the settings remain.
-</p>
 
         </section>
 

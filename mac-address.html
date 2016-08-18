@@ -175,7 +175,7 @@ function codebenderInit() {
     };
     var macCodebenderClient = new CodebenderClient(macOptions);
     var macCodebenderFilelist = {
-        'Mac Address.ino': '#include &lt;ESP8266WiFi.h&gt;\n\nuint8_t  MAC_STA[]                = {0, 0, 0, 0, 0, 0};\n\nvoid setup()\n{\n\tSerial.begin(115200);\n}\n\nvoid loop()\n{\n\tSerial.println();\n\n\tSerial.println("MAC[STA]:");\n\tuint8_t* MAC = WiFi.macAddress(MAC_STA);                   //get MAC address of STA interface\n\tfor (int i = 0; i &lt; 6; ++i)\n\t{\n\t\tSerial.print(MAC[i], HEX);\n\t\tif(i &lt; 5) Serial.print(":");\n\t}\n\tSerial.println();\n}\n'
+        'Mac Address.ino': '#include &lt;ESP8266WiFi.h&gt;\n\nuint8_t  MAC_STA[]                = {0, 0, 0, 0, 0, 0};\nuint8_t* MAC;\n\nvoid setup()\n{\n\tSerial.begin(115200);\n\t//get MAC address of STA interface\n\tMAC = WiFi.macAddress(MAC_STA);\n}\n\nvoid loop()\n{\n\tSerial.println();\n\tSerial.println("MAC[STA]:");\n\tfor (int i = 0; i &lt; 6; ++i)\n\t{\n\t\tSerial.print(MAC[i], HEX);\n\t\tif(i &lt; 5) Serial.print(":");\n\t}\n\tSerial.println();\n\tdelay(1000);\n}\n'
     };
     macCodebenderClient.setFilelist(macCodebenderFilelist);
     // blinkCodebenderClient.setCloneUrl('http://chipkitdemo.codebender.cc/dashboard/#/ide/wksp-blink');

@@ -166,7 +166,18 @@ CodebenderClient.prototype.setCloneUrl = function (url) {
   </script>
 
   <script>
+  function getParameterByName(name, url) {
+      if (!url) url = window.location.href;
+      name = name.replace(/[\[\]]/g, '\\$&');
+      var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
+      var results = regex.exec(url);
+      if (!results) return null;
+      if (!results[2]) return '';
+      return decodeURIComponent(results[2].replace(/\+/g, ' '));
+  }
+
 function codebenderInit() {
+    var apiKey = getParameterByName('api_key');
     // ESP8266 codebender editor
     var otasetupOptions = {
         id: 0,
@@ -179,6 +190,12 @@ function codebenderInit() {
         'SPIFFSWiFiCredentials.hpp' : '#include &lt;Arduino.h&gt;\n\n/*#include &lt;String.h&gt;*/\n\n#include &lt;ESP8266WiFi.h&gt;\n#include &lt;ESP8266WiFiMulti.h&gt;\n\nclass SPIFFSWiFiCredentials\n{\n  public:  \n  SPIFFSWiFiCredentials(void);\n  static void begin(void);\n  static void addSSID(String ssid, String password);\n  static void save(void);\n  static void load(ESP8266WiFiMulti &WiFiMulti);\n\n  private:\n  static void saveDataToFile(String fileNameForSave, String DataToSave);\n  static String loadDataFromFile(String fileNameForOpen);\n\n  static String credentialsString;\n};\n',
         'SPIFFSWiFiCredentials.cpp' : '\n#include "SPIFFSWiFiCredentials.hpp"\n#include &lt;FS.h&gt;\n\nString SPIFFSWiFiCredentials::credentialsString;\n\nvoid SPIFFSWiFiCredentials::begin(void)\n{\n  SPIFFS.begin();\n}\n\nvoid SPIFFSWiFiCredentials::addSSID(String ssid, String password)\n{\n  Serial.println("Adding SSID:     " + ssid);\n  Serial.println("       Password: " + (password == ""? "***NO PASSWORD***": password));\n\n  credentialsString += ssid + "\\n" + password + "\\n";\n//  Serial.print("Credentials String:\\n" + SPIFFSWiFiCredentials::credentialsString);\n}\n\nvoid SPIFFSWiFiCredentials::save(void)\n{\n  SPIFFSWiFiCredentials::saveDataToFile("credentials", credentialsString);\n}\n\nvoid SPIFFSWiFiCredentials::load(ESP8266WiFiMulti &WiFiMulti)\n{\n  String credentials = SPIFFSWiFiCredentials::loadDataFromFile("credentials");  \n\n//  Serial.println("creds loaded: ");\n//  Serial.println(credentials);\n\n  int done = false;\n  int indexOfNewline;\n  while(!done)\n  {\n    indexOfNewline = credentials.indexOf(\'\\n\');\n    if(indexOfNewline == -1)\n    {\n      done = true;\n      continue;\n    }\n    String ssid = credentials.substring(0, indexOfNewline);\n\n    credentials = credentials.substring(indexOfNewline+1);\n\n    indexOfNewline = credentials.indexOf(\'\\n\');\n    if(indexOfNewline == -1)\n    {\n      done = true;\n      continue;\n    }\n    String password = credentials.substring(0, indexOfNewline);\n    \n    credentials = credentials.substring(indexOfNewline+1);\n\n    Serial.println("Setting up WiFi SSID");\n    Serial.println("SSID:     " + ssid);\n    Serial.println("Password: " + (password == ""? "***NO PASSWORD***": password));\n\n    char bufferArray[2][20];\n    ssid.toCharArray(bufferArray[0], 20);\n    password.toCharArray(bufferArray[1], 20);\n\n    WiFiMulti.addAP(bufferArray[0], bufferArray[1]);\n\n//    Serial.println("credentials are now:\\n" + credentials);\n//    done = true;\n  }\n}\n\nvoid SPIFFSWiFiCredentials::saveDataToFile(String fileNameForSave, String DataToSave)\n{\n  String filePath = String("/data/" + fileNameForSave+ ".dat");\n  Serial.println("Saving File:  " + filePath);\n\n  //SPIFFS.begin();\n  File f = SPIFFS.open(filePath, "w");\n  if (!f)\n  {\n    Serial.println(F("file open failed"));\n  }\n  else\n  {\n    f.println(String(DataToSave + String(\'\\r\')));\n    f.close();\n  }\n  return;\n}\n\nString SPIFFSWiFiCredentials::loadDataFromFile(String fileNameForOpen)\n{\n  String filePath = String("/data/" + fileNameForOpen+ ".dat");\n  Serial.println("Loading File: " + filePath);\n\n  int fileOpenFail;\n  String WhatIwillReturn;\n  //SPIFFS.begin();\n  File f = SPIFFS.open(filePath, "r");\n  if (!f)\n  {\n    fileOpenFail = 1;\n    //Serial.print("file open failed  :");\n    //Serial.println(fileNameForOpen);\n  }\n  else\n  {\n    fileOpenFail = 0;\n    WhatIwillReturn =  f.readStringUntil(\'\\r\');\n//    WhatIwillReturn.replace("\\n", "");\n    f.close();\n    return WhatIwillReturn;\n  }\n}'
     };
+
+    if (apiKey) {
+      otasetupCodebenderFilelist['OTA Setup.ino'] = otasetupCodebenderFilelist['OTA Setup.ino'].replace('CODEBENDER_API_KEY', apiKey);
+      $('#api-key-text').text('Select your board, your port, and click Flash.');
+    }
+
     otasetupCodebenderClient.setFilelist(otasetupCodebenderFilelist);
     // helloworldCodebenderClient.setCloneUrl('http://chipkitdemo.codebender.cc/dashboard/#/ide/wksp-helloworld');
 
@@ -229,7 +246,7 @@ window.onload = codebenderInit;
   OK, time to roll! The following code is a sample Blink sketch, which simultaneously listends for new OTA Updates every 30 seconds.
 </p>
 
-<p style="font-weight:500; text-decoration:underline;">
+<p id="api-key-text" style="font-weight:500; text-decoration:underline;">
   Go to your Dashboard and find your API Key. Copy that and replace the <code>CODEBENDER_API_KEY</code> placeholder text in <b>line 15</b> with your API Key. Now select your board, your port, and click Flash.
 </p>
 

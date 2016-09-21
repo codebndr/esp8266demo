@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <title>ESP8266 - API key demo</title>
+</head>
+
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script>
+        /**
+         * CodebenderClient
+         * Front-end client for the embedded views
+         * @param options object Configuration options for the client
+         */
+        function CodebenderClient(options) {
+            /**
+             * Client ID
+             * Shared between the parent frame and the iframe
+             * Usefull for the parent to identify the source iframe of a message
+             * when multiple iframes exists on its page
+             */
+            this.id = options.id ? options.id : 0;
+            /**
+             * URL of the codebender.cc domain
+             * Used when transmitting messages to the iframe
+             */
+            this.CODEBENDER_DOMAIN = options.CODEBENDER_DOMAIN ? options.CODEBENDER_DOMAIN : 'http://localhost';
+            /**
+             * Template for the messages sent to the iframe
+             */
+            this.CODEBENDER_MESSAGE = {
+                /**
+                 * Service name.
+                 * Used by the iframe to check if the message must be processed
+                 */
+                service: 'codebender.cc',
+                /**
+                 * Action name.
+                 * Used by the iframe to identify the action related to the received message
+                 */
+                action: '',
+                /**
+                 * Client ID
+                 */
+                id: this.id
+            };
+            /**
+             * Setup DOM elements
+             */
+            this.iframe = options.iframe ? options.iframe : null;
+            if (options.verify) {
+                this.$verify = $(options.verify);
+            }
+            if (options.restore) {
+                this.$restore = $(options.restore);
+            }
+            if (options.operationOutput) {
+                this.$operationOutput = $(options.operationOutput);
+            }
+            // Start the event listeners
+            this.startEventListeners();
+        }
+        /**
+         * Starts the event listeners of the client
+         */
+        CodebenderClient.prototype.startEventListeners = function() {
+            var self = this;
+            // Listener for the received messages from the iframe
+            $(window).on('message', this.messageHandler.bind(self));
+            // Listener for the Verify button
+            if (this.$verify) {
+                this.$verify.on('click', this.verifyHandler.bind(self));
+            }
+            // Listener for the restore button
+            if (this.$restore) {
+                this.$restore.on('click', this.restoreHandler.bind(self));
+            }
+        };
+        /**
+         * Sends a message to the iframe
+         * @param message object Message to send
+         */
+        CodebenderClient.prototype.sendMessage = function(message) {
+            message = JSON.stringify(message);
+            if (this.iframe) {
+                this.iframe.postMessage(message, this.CODEBENDER_DOMAIN);
+            }
+        };
+        /**
+         * Handler for the messages received from the iframe
+         * @param event Event object of the message event
+         */
+        CodebenderClient.prototype.messageHandler = function(event) {
+            try {
+                var origin = event.originalEvent.origin;
+                if (origin !== this.CODEBENDER_DOMAIN) {
+                    return;
+                }
+
+                var data = event.originalEvent.data;
+                var message = JSON.parse(data);
+                if (message.service === 'codebender.cc' && message.response) {
+                    if (message.action === 'operation-output' && this.$operationOutput) {
+                        this.$operationOutput.html(message.response);
+                    }
+                }
+            } catch (error) {}
+        };
+        /**
+         * Handler for the Verify button
+         */
+        CodebenderClient.prototype.verifyHandler = function() {
+            var message = this.CODEBENDER_MESSAGE;
+            message.action = 'verify';
+            this.sendMessage(message);
+        };
+        /**
+         * Handler for the Restore button
+         */
+        CodebenderClient.prototype.restoreHandler = function() {
+            var message = this.CODEBENDER_MESSAGE;
+            message.action = 'restore';
+            this.sendMessage(message);
+        };
+        /**
+         * Sets the filelist inside the iframe
+         * @param filelist object The filelist to set
+         */
+        CodebenderClient.prototype.setFilelist = function(filelist) {
+            var message = this.CODEBENDER_MESSAGE;
+            message.filelist = filelist;
+            message.action = 'set-filelist';
+            this.sendMessage(message);
+        };
+        /**
+         * Gets the filelist from the iframe
+         */
+        CodebenderClient.prototype.getFilelist = function() {
+            var message = this.CODEBENDER_MESSAGE;
+            message.action = 'get-filelist';
+            this.sendMessage(message);
+        };
+        /**
+         * Sets the Clone URL
+         */
+        CodebenderClient.prototype.setCloneUrl = function(url) {
+            var message = this.CODEBENDER_MESSAGE;
+            message.action = 'set-clone-url';
+            message.cloneUrl = url;
+            this.sendMessage(message);
+        };
+    </script>
+
+    <script>
+        function getParameterByName(name, url) {
+            if (!url) url = window.location.href;
+            name = name.replace(/[\[\]]/g, '\\$&');
+            var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
+            var results = regex.exec(url);
+            if (!results) return null;
+            if (!results[2]) return '';
+            return decodeURIComponent(results[2].replace(/\+/g, ' '));
+        }
+
+        function codebenderInit() {
+            var apiKey = getParameterByName('api_key');
+
+            // ESP8266 codebender editor
+            var otasetupOptions = {
+                id: 0,
+                CODEBENDER_DOMAIN: 'https://esp8266-proteus.codebender.cc',
+                iframe: document.getElementById('otasetup-proteus-iframe').contentWindow
+            };
+            var otasetupCodebenderClient = new CodebenderClient(otasetupOptions);
+            var otasetupCodebenderFilelist = {
+                'OTA Setup.ino': '#include &lt;Arduino.h&gt;\n\n#include &lt;ESP8266WiFi.h&gt;\n#include &lt;ESP8266WiFiMulti.h&gt;\n\n#include &lt;ESP8266HTTPClient.h&gt;\n#include &lt;ESP8266httpUpdate.h&gt;\n\n#include "SPIFFSWiFiCredentials.hpp"\n\nESP8266WiFiMulti WiFiMulti;\n\nconst int ledPin = LED_BUILTIN;\n\n#define __CODEBENDER_UPDATE_URL__ "http://esp.codebender.cc/api/update/CODEBENDER_API_KEY"\n#define __CODEBENDER_AUTO_VERSION__ "0"\n\nvoid setup() {\n\n  Serial.begin(115200);\n  Serial.setDebugOutput(true);\n\n  Serial.println();\n  Serial.println();\n  Serial.println();\n\n  for (uint8_t t = 4; t &gt; 0; t--) {\n    Serial.printf("[SETUP] WAIT %d...\\n", t);\n    Serial.flush();\n    delay(1000);\n  }\n  \n   SPIFFSWiFiCredentials::begin();\n   SPIFFSWiFiCredentials::load(WiFiMulti);\n\n  Serial.print("Update URL: ");\n  Serial.println(__CODEBENDER_UPDATE_URL__);\n  Serial.print("Current Version: ");\n  Serial.println(__CODEBENDER_AUTO_VERSION__);\n\n  pinMode(ledPin, OUTPUT);\n}\n\n\nvoid blinkLEDWithoutDelay(int pin);\nvoid handlePeriodicUpdates();\n\nvoid loop() {\n\n  blinkLEDWithoutDelay(ledPin);\n\n  // if the interval since the last update has passed, see if there\'s an update and if so fetch it & update\n  handlePeriodicUpdates();\n}\n\n\nvoid blinkLEDWithoutDelay(int pin)\n{\n  static unsigned long blinkTimestamp = 0;\n  static const int interval = 1000;\n  if (millis() - blinkTimestamp &gt; interval)\n  {\n    static bool status = 0;\n    digitalWrite(ledPin, status);\n    if (status == 0) status = 1;\n    else status = 0;\n\n    blinkTimestamp = millis();\n  }\n}\n\nvoid handlePeriodicUpdates(void)\n{\n  static unsigned long timestamp = 0;\n  if (millis() - timestamp &gt; 30000)\n  {\n    timestamp = millis();\n\n    // wait for WiFi connection\n    if ((WiFiMulti.run() == WL_CONNECTED)) {\n\n      Serial.println("Trying to fetch new binary");\n\n      t_httpUpdate_return ret = ESPhttpUpdate.update(__CODEBENDER_UPDATE_URL__, __CODEBENDER_AUTO_VERSION__);\n      switch (ret) {\n        case HTTP_UPDATE_FAILED:\n          Serial.printf("HTTP_UPDATE_FAILED Error (%d): %s", ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());\n          break;\n\n        case HTTP_UPDATE_NO_UPDATES:\n          Serial.println("HTTP_UPDATE_NO_UPDATES");\n          break;\n\n        case HTTP_UPDATE_OK:\n          Serial.println("HTTP_UPDATE_OK");\n          break;\n      }\n    }\n\n  }\n\n}\n',
+                'SPIFFSWiFiCredentials.hpp': '#include &lt;Arduino.h&gt;\n\n/*#include &lt;String.h&gt;*/\n\n#include &lt;ESP8266WiFi.h&gt;\n#include &lt;ESP8266WiFiMulti.h&gt;\n\nclass SPIFFSWiFiCredentials\n{\n  public:  \n  SPIFFSWiFiCredentials(void);\n  static void begin(void);\n  static void addSSID(String ssid, String password);\n  static void save(void);\n  static void load(ESP8266WiFiMulti &WiFiMulti);\n\n  private:\n  static void saveDataToFile(String fileNameForSave, String DataToSave);\n  static String loadDataFromFile(String fileNameForOpen);\n\n  static String credentialsString;\n};\n',
+                'SPIFFSWiFiCredentials.cpp': '\n#include "SPIFFSWiFiCredentials.hpp"\n#include &lt;FS.h&gt;\n\nString SPIFFSWiFiCredentials::credentialsString;\n\nvoid SPIFFSWiFiCredentials::begin(void)\n{\n  SPIFFS.begin();\n}\n\nvoid SPIFFSWiFiCredentials::addSSID(String ssid, String password)\n{\n  Serial.println("Adding SSID:     " + ssid);\n  Serial.println("       Password: " + (password == ""? "***NO PASSWORD***": password));\n\n  credentialsString += ssid + "\\n" + password + "\\n";\n//  Serial.print("Credentials String:\\n" + SPIFFSWiFiCredentials::credentialsString);\n}\n\nvoid SPIFFSWiFiCredentials::save(void)\n{\n  SPIFFSWiFiCredentials::saveDataToFile("credentials", credentialsString);\n}\n\nvoid SPIFFSWiFiCredentials::load(ESP8266WiFiMulti &WiFiMulti)\n{\n  String credentials = SPIFFSWiFiCredentials::loadDataFromFile("credentials");  \n\n//  Serial.println("creds loaded: ");\n//  Serial.println(credentials);\n\n  int done = false;\n  int indexOfNewline;\n  while(!done)\n  {\n    indexOfNewline = credentials.indexOf(\'\\n\');\n    if(indexOfNewline == -1)\n    {\n      done = true;\n      continue;\n    }\n    String ssid = credentials.substring(0, indexOfNewline);\n\n    credentials = credentials.substring(indexOfNewline+1);\n\n    indexOfNewline = credentials.indexOf(\'\\n\');\n    if(indexOfNewline == -1)\n    {\n      done = true;\n      continue;\n    }\n    String password = credentials.substring(0, indexOfNewline);\n    \n    credentials = credentials.substring(indexOfNewline+1);\n\n    Serial.println("Setting up WiFi SSID");\n    Serial.println("SSID:     " + ssid);\n    Serial.println("Password: " + (password == ""? "***NO PASSWORD***": password));\n\n    char bufferArray[2][20];\n    ssid.toCharArray(bufferArray[0], 20);\n    password.toCharArray(bufferArray[1], 20);\n\n    WiFiMulti.addAP(bufferArray[0], bufferArray[1]);\n\n//    Serial.println("credentials are now:\\n" + credentials);\n//    done = true;\n  }\n}\n\nvoid SPIFFSWiFiCredentials::saveDataToFile(String fileNameForSave, String DataToSave)\n{\n  String filePath = String("/data/" + fileNameForSave+ ".dat");\n  Serial.println("Saving File:  " + filePath);\n\n  //SPIFFS.begin();\n  File f = SPIFFS.open(filePath, "w");\n  if (!f)\n  {\n    Serial.println(F("file open failed"));\n  }\n  else\n  {\n    f.println(String(DataToSave + String(\'\\r\')));\n    f.close();\n  }\n  return;\n}\n\nString SPIFFSWiFiCredentials::loadDataFromFile(String fileNameForOpen)\n{\n  String filePath = String("/data/" + fileNameForOpen+ ".dat");\n  Serial.println("Loading File: " + filePath);\n\n  int fileOpenFail;\n  String WhatIwillReturn;\n  //SPIFFS.begin();\n  File f = SPIFFS.open(filePath, "r");\n  if (!f)\n  {\n    fileOpenFail = 1;\n    //Serial.print("file open failed  :");\n    //Serial.println(fileNameForOpen);\n  }\n  else\n  {\n    fileOpenFail = 0;\n    WhatIwillReturn =  f.readStringUntil(\'\\r\');\n//    WhatIwillReturn.replace("\\n", "");\n    f.close();\n    return WhatIwillReturn;\n  }\n}'
+            };
+
+            if (apiKey) {
+              otasetupCodebenderFilelist['OTA Setup.ino'] = otasetupCodebenderFilelist['OTA Setup.ino'].replace('CODEBENDER_API_KEY', apiKey);
+            }
+
+            otasetupCodebenderClient.setFilelist(otasetupCodebenderFilelist);
+        }
+
+        window.onload = codebenderInit;
+    </script>
+
+    <iframe id="otasetup-proteus-iframe" style="height: 510px; width: 100%; margin: 10px 0 10px;" allowTransparency="true" src="https://esp8266-proteus.codebender.cc" frameborder="0"></iframe>
+</body>
+
+</html>
